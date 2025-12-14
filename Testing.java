@@ -36,6 +36,16 @@ public class Testing {
 		driver.get(page);
 	}//openWebPage
 	
+	/**
+	 * This method takes a given WebDriver and returns the title of the web page in String format.
+	 * @param driver The WebDriver being used for the automation.
+	 * @return The title of the found web page in String format.
+	 */
+	public static String getPageTitle(WebDriver driver) {
+		//get the title of the given driver page
+		return driver.getTitle();
+	}//getPageTitle
+	
 	public static void main(String[] args) throws InterruptedException {
 		
 		//set up a new driver to open up firefox using startSession()
@@ -49,6 +59,68 @@ public class Testing {
 		openWebPage(driver, page);
 		//wait
 		Thread.sleep(2000);
+		
+		//confirm the website is correct
+		//get the title of the page using getPageTitle method
+		String title = getPageTitle(driver);
+		//print the title
+		System.out.println("The title of this page is: " + title + ".");
+		//check if the page title is correct
+		if(title.contains("To-Do List Website")){
+			//the title is correct
+			System.out.println("Correct Website.");
+		}//if
+		else {
+			//the title is incorrect
+			System.out.println("ERROR- Wrong Website.");
+		}//else
+		
+		//confirm default tab shown in "All"
+		//check "There are currently no tasks." is shown
+		//check "0 active items left" is shown
+		
+		//click active tab
+		//check "There are currently no active tasks."
+		
+		//click completed tab
+		//check "There are currently no completed tasks."
+		
+		//click all tab
+		
+		//click text bar
+		//input "wash the car" into text bar
+		//press add button
+		//confirm "wash the car" is shown
+		//confirm all tab is still clicked
+		//confirm "1 active item left" is shown
+		
+		//click active tab
+		//confirm "wash the car" is still shown
+		
+		//click completed tab
+		//confirm "There are currently no completed tasks." is still shown
+		
+		//click all tab
+		//click the checkbox next to "wash the car"
+		//confirm the tab is still all tab
+		//confirm "wash the car" is marked as completed
+		//confirm "0 active items left" is shown
+		
+		//click active tab
+		//confirm "There are currently no active tasks." is shown
+		
+		//click completed tab
+		//confirm "wash the car" completed task is shown
+		
+		//click text bar
+		//input "change kitchen light" into text bar
+		//press add button
+		//confirm "wash the car" is shown completed
+		//confirm "change kitchen light" is not shown
+		//confirm "1 active item left" is shown
+		
+		//etc................
+		
 		
 		//end the session ALWAYS NEEDED
 		endSession(driver);
