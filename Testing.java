@@ -45,6 +45,39 @@ public class Testing {
 		//get the title of the given driver page
 		return driver.getTitle();
 	}//getPageTitle
+
+	
+	/**
+	 * This method takes a given WebDriver and returns the name of the active tab from a list of all tabs.
+	 * @param driver The WebDriver being used for the automation.
+	 * @return The name of the active tab in String format. If no active filter is found, ERROR is returned in String format.
+	 */
+	public static String getActiveFilterTab(WebDriver driver) {
+		//set path of filters
+		String elementPath = "html/body/div/div[2]/span";
+		//save filters in a List of WebElements
+		List<WebElement> tabList = driver.findElements(By.xpath(elementPath));
+		
+		//iterators to go through list
+		Iterator<WebElement> a1 = tabList.iterator();
+		Iterator<WebElement> a2 = tabList.iterator();
+		
+		//while there are still tabs to check,
+		while(a1.hasNext() && a2.hasNext()) {
+			//check if the current tab is the active tab
+			if(a2.next().getAttribute("class").equals("filter active")) {
+				//active filter, return tab name
+				return a1.next().getText();
+			}//if
+			else {
+				//else, not the active filter, keep going
+				a1.next().getText();
+			}//else
+		}//while
+		
+		//didn't find the active filter, return error string
+		return "ERROR";
+	}//getActiveFilterTab
 	
 	public static void main(String[] args) throws InterruptedException {
 		
@@ -76,6 +109,10 @@ public class Testing {
 		}//else
 		
 		//confirm default tab shown in "All"
+		//call getActiveFilterTab to get the name of the current active filter tab
+		String currentTab = getActiveFilterTab(driver);
+		System.out.println("The current active filter is: " + currentTab + ".");
+		
 		//check "There are currently no tasks." is shown
 		//check "0 active items left" is shown
 		
