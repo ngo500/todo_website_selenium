@@ -184,6 +184,14 @@ public class Testing {
 		}//else
 		
 		//check "0 active items left" is shown
+		elementPath = "items-left";
+		currentEle = setElementById(driver, elementPath);
+		if(currentEle.getText().equals("0 active items left")) {
+			System.out.println("Correct 0 items left message is shown.");
+		}//if
+		else {
+			System.out.println("ERROR- 0 active items left message is not shown.");
+		}//else
 		
 		//click active tab
 		//check "There are currently no active tasks."
