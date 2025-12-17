@@ -78,6 +78,36 @@ public class Testing {
 		//didn't find the active filter, return error string
 		return "ERROR";
 	}//getActiveFilterTab
+
+		/**
+	 * This method takes a given WebDriver and given String of an element ID, and finds and returns the matching WebElement.
+	 * @param driver The WebDriver being used for automation.
+	 * @param elementId The String of the ID being searched for.
+	 * @return The WebElement that matches the given ID.
+	 */
+	public static WebElement setElementById(WebDriver driver, String elementId) {
+		return driver.findElement(By.id(elementId));
+	}//setElementById
+	
+	/**
+	 * This method takes a given WebDriver and given String of a class name, and finds and returns the matching WebElement.
+	 * @param driver The WebDriver being used for automation.
+	 * @param elementId The String of the class being searched for.
+	 * @return The WebElement that matches the given class.
+	 */
+	public static WebElement setElementByClass(WebDriver driver, String className) {
+		return driver.findElement(By.className(className));
+	}//setElementByClass
+	
+	/**
+	 * This method takes a given WebDriver and given String of an element's XPath, and finds and returns the matching WebElement.
+	 * @param driver  The WebDriver being used for automation.
+	 * @param pathText The String of the XPath being searched for.
+	 * @return The WebElement that matches the given XPath.
+	 */
+	public static WebElement setElementByXPath(WebDriver driver, String pathText) {
+		return driver.findElement(By.xpath(pathText));
+	}//setElementByXPath
 	
 	public static void main(String[] args) throws InterruptedException {
 		
@@ -114,6 +144,45 @@ public class Testing {
 		System.out.println("The current active filter is: " + currentTab + ".");
 		
 		//check "There are currently no tasks." is shown
+		//call setElementById to find the element that displays the empty state
+		String elementPath = "empty-state";
+		WebElement currentEle = setElementByClass(driver, elementPath);
+		if(currentEle.getAttribute("class").equals(elementPath)){
+			System.out.println("Empty state is shown.");
+		}//if
+		else {
+			System.out.println("ERROR- Empty state is not shown." + currentEle.getAttribute("class") + " is shown.");
+		}//else
+		
+		//call setElementByXPath to find the element that displays the clipboard picture
+		elementPath = "/html/body/div/div[3]/div/i";
+		currentEle = setElementByXPath(driver, elementPath);
+		elementPath = "fas fa-clipboard-list";
+		if(currentEle.getAttribute("class").equals(elementPath)){
+			System.out.println("Clipboard art is shown.");
+		}//if
+		else {
+			System.out.println("ERROR- Clipboard art is not shown." + currentEle.getAttribute("class") + " is shown.");
+		}//else
+		
+		//call setElementById to find the element that displays the no tasks message
+		elementPath = "empty-task-message";
+		currentEle = setElementById(driver, elementPath);
+		if(currentEle.getAttribute("id").equals(elementPath)){
+			System.out.println("Empty tasks message is shown.");
+			
+			//check if the correct message is displayed
+			if(currentEle.getText().equals("There are currently no tasks.")) {
+				System.out.println("Correct message is shown.");
+			}//if
+			else {
+				System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+			}//else
+		}//if
+		else {
+			System.out.println("ERROR- Empty tasks message is not shown. " + currentEle.getAttribute("id") + " is shown.");
+		}//else
+		
 		//check "0 active items left" is shown
 		
 		//click active tab
