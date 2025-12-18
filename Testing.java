@@ -46,6 +46,18 @@ public class Testing {
 		return driver.getTitle();
 	}//getPageTitle
 
+	/**
+	 * This method takes a given WebDriver and returns a List<WebElement> of all tabs.
+	 * @param driver The WebDriver being used for the automation.
+	 * @return The List<WebElement> of all tabs.
+	 */
+	public static List<WebElement> getFilterTabList(WebDriver driver){
+		//set path of filters
+		String elementPath = "html/body/div/div[2]/span";
+		//save filters in a List of WebElements
+		List<WebElement> tabList = driver.findElements(By.xpath(elementPath));
+		return tabList;
+	}//getFilterTabList
 	
 	/**
 	 * This method takes a given WebDriver and returns the name of the active tab from a list of all tabs.
@@ -53,10 +65,8 @@ public class Testing {
 	 * @return The name of the active tab in String format. If no active filter is found, ERROR is returned in String format.
 	 */
 	public static String getActiveFilterTab(WebDriver driver) {
-		//set path of filters
-		String elementPath = "html/body/div/div[2]/span";
-		//save filters in a List of WebElements
-		List<WebElement> tabList = driver.findElements(By.xpath(elementPath));
+		//call getFilterList to get the filters
+		List<WebElement> tabList = getFilterTabList(driver);
 		
 		//iterators to go through list
 		Iterator<WebElement> a1 = tabList.iterator();
@@ -71,14 +81,46 @@ public class Testing {
 			}//if
 			else {
 				//else, not the active filter, keep going
-				a1.next().getText();
+				a1.next();
 			}//else
 		}//while
 		
 		//didn't find the active filter, return error string
 		return "ERROR";
 	}//getActiveFilterTab
-
+	
+	/**
+	 * This method takes a given WebDriver and returns the WebElement of the tab from being searched for.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param tab The String of the given name of the tab being searched for.
+	 * @return The WebElement of the tab. If no matching tab filter is found, a null WebElement is returned.
+	 */
+	public static WebElement getSpecificFilterTab(WebDriver driver, String tab) {
+		//call getFilterList to get the filters
+		List<WebElement> tabList = getFilterTabList(driver);
+		
+		//iterators to go through list
+		Iterator<WebElement> a1 = tabList.iterator();
+		Iterator<WebElement> a2 = tabList.iterator();
+				
+		//while there are still tabs to check,
+		while(a1.hasNext() && a2.hasNext()) {
+			//check if the current tab is matching tab being searched for
+			if(a2.next().getText().equals(tab)) {
+				//matching tab, return tab
+				return a1.next();
+			}//if
+			else {
+				//else, not the matching tab filter, keep going
+				a1.next();
+			}//else
+		}//while
+				
+		//didn't find the active filter, return error
+		WebElement error = null;
+		return error;
+	}//getSpecificFilterTab
+	
 		/**
 	 * This method takes a given WebDriver and given String of an element ID, and finds and returns the matching WebElement.
 	 * @param driver The WebDriver being used for automation.
@@ -194,6 +236,18 @@ public class Testing {
 		}//else
 		
 		//click active tab
+		elementPath = "active";
+		currentEle = getSpecificFilterTab(driver, elementPath);
+		if(currentEle.getText().equals(elementPath)) {
+			System.out.println("The correct filter tab was found.");
+			clickElement(currentEle);
+			currentTab = getActiveFilterTab(driver);
+			System.out.println("The current active filter is: " + currentTab + ".");
+		}//if
+		else {
+			System.out.println("ERROR- The incorrect filter tab was found.");
+		}//else
+		
 		//check "There are currently no active tasks."
 		
 		//click completed tab
