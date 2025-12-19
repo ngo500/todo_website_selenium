@@ -1,5 +1,10 @@
 package todo_website_testing;
+import java.util.Iterator;
+import java.util.List;
+
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 
@@ -45,7 +50,7 @@ public class Testing {
 		//get the title of the given driver page
 		return driver.getTitle();
 	}//getPageTitle
-
+	
 	/**
 	 * This method takes a given WebDriver and returns a List<WebElement> of all tabs.
 	 * @param driver The WebDriver being used for the automation.
@@ -121,7 +126,7 @@ public class Testing {
 		return error;
 	}//getSpecificFilterTab
 	
-		/**
+	/**
 	 * This method takes a given WebDriver and given String of an element ID, and finds and returns the matching WebElement.
 	 * @param driver The WebDriver being used for automation.
 	 * @param elementId The String of the ID being searched for.
@@ -151,6 +156,79 @@ public class Testing {
 		return driver.findElement(By.xpath(pathText));
 	}//setElementByXPath
 	
+	/**
+	 * This method takes a given WebElement and clicks on it.
+	 * @param givenElement The WebElement being clicked on.
+	 */
+	public static void clickElement(WebElement givenElement) {
+		//click the on the given element
+		givenElement.click();
+	}//clickElement
+	
+	/**
+	 * This method takes the String name of the current WebElement, and checks if it matches the String elementPath.
+	 * @param currentEle The name of the tab in String form.
+	 * @param elementPath The name the tab should be in String form.
+	 * @return The int that shows the result of the comparison. 
+	 * The int is 0 if there there is a match, and a 1 if the given names do not match.
+	 */
+	public static int confirmTabName(String currentEle, String elementPath) {
+		int errorCount = 0;
+		if(!(currentEle.equals(elementPath))) {
+			errorCount++;
+		}//if
+		else {}//else
+		return errorCount;
+	}//confirmTabName
+	
+	/**
+	 * This method takes the given WebElement, and compares its class attribute with the given String elementPath.
+	 * @param currentEle The given WebElement that will have its class compared.
+	 * @param elementPath The given String to compare with.
+	 * @return The int that shows the result of the comparison. 
+	 * The int is 0 if there there is a match, and a 1 if the given names do not match.
+	 */
+	public static int confirmElementByClass(WebElement currentEle, String elementPath) {
+		int errorCount = 0;
+		if(!(currentEle.getAttribute("class").equals(elementPath))){
+			errorCount++;
+		}//if
+		else {}//else
+		return errorCount;
+	}//confirmTabName
+	
+	/**
+	 * This method takes the given WebElement, and compares its ID attribute with the given String elementPath.
+	 * @param currentEle The given WebElement that will have its ID compared.
+	 * @param elementPath The given String to compare with.
+	 * @return The int that shows the result of the comparison. 
+	 * The int is 0 if there there is a match, and a 1 if the given names do not match.
+	 */
+	public static int confirmElementById(WebElement currentEle, String elementPath) {
+		int errorCount = 0;
+		if(!(currentEle.getAttribute("id").equals(elementPath))){
+			errorCount++;
+		}//if
+		else {}//else
+		return errorCount;
+	}//confirmElementById
+	
+	/**
+	 * This method takes the String text of the current WebElement, and checks if it matches the String elementPath.
+	 * @param currentEle The text in String form.
+	 * @param elementPath The text it should match in String form.
+	 * @return The int that shows the result of the comparison. 
+	 * The int is 0 if there there is a match, and a 1 if the given text does not match.
+	 */
+	public static int confirmMessageText(String currentEle, String elementPath) {
+		int errorCount = 0;
+		if(!(currentEle.equals(elementPath))){
+			errorCount++;
+		}//if
+		else {}//else
+		return errorCount;
+	}//confirmMessageText
+	
 	public static void main(String[] args) throws InterruptedException {
 		
 		//set up a new driver to open up firefox using startSession()
@@ -165,96 +243,183 @@ public class Testing {
 		//wait
 		Thread.sleep(2000);
 		
+		//start ERROR count
+		int errorCtr = 0;
+		
 		//confirm the website is correct
 		//get the title of the page using getPageTitle method
 		String title = getPageTitle(driver);
+		String matching = "To-Do List Website";
 		//print the title
 		System.out.println("The title of this page is: " + title + ".");
 		//check if the page title is correct
-		if(title.contains("To-Do List Website")){
-			//the title is correct
-			System.out.println("Correct Website.");
-		}//if
-		else {
+		if(!(title.equals(matching))){
 			//the title is incorrect
+			errorCtr++;
 			System.out.println("ERROR- Wrong Website.");
-		}//else
+		}//if
+		else {}//else
 		
 		//confirm default tab shown in "All"
 		//call getActiveFilterTab to get the name of the current active filter tab
+		String elementPath = "All";
 		String currentTab = getActiveFilterTab(driver);
-		System.out.println("The current active filter is: " + currentTab + ".");
+		if(confirmTabName(currentTab, elementPath) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Default tab is not correct.");
+		}//if
+		else {}//else
 		
 		//check "There are currently no tasks." is shown
 		//call setElementById to find the element that displays the empty state
-		String elementPath = "empty-state";
+		elementPath = "empty-state";
 		WebElement currentEle = setElementByClass(driver, elementPath);
-		if(currentEle.getAttribute("class").equals(elementPath)){
-			System.out.println("Empty state is shown.");
+		if(confirmElementByClass(currentEle, elementPath) > 0){
+			errorCtr++;
+			System.out.println("ERROR- Empty state is not shown. " + currentEle.getAttribute("class") + " is shown.");
 		}//if
-		else {
-			System.out.println("ERROR- Empty state is not shown." + currentEle.getAttribute("class") + " is shown.");
-		}//else
+		else {}//else
 		
 		//call setElementByXPath to find the element that displays the clipboard picture
 		elementPath = "/html/body/div/div[3]/div/i";
 		currentEle = setElementByXPath(driver, elementPath);
 		elementPath = "fas fa-clipboard-list";
-		if(currentEle.getAttribute("class").equals(elementPath)){
-			System.out.println("Clipboard art is shown.");
+		if(confirmElementByClass(currentEle, elementPath) > 0){
+			errorCtr++;
+			System.out.println("ERROR- Clipboard art is not shown. " + currentEle.getAttribute("class") + " is shown.");
 		}//if
-		else {
-			System.out.println("ERROR- Clipboard art is not shown." + currentEle.getAttribute("class") + " is shown.");
-		}//else
+		else {}//else
 		
 		//call setElementById to find the element that displays the no tasks message
 		elementPath = "empty-task-message";
 		currentEle = setElementById(driver, elementPath);
-		if(currentEle.getAttribute("id").equals(elementPath)){
-			System.out.println("Empty tasks message is shown.");
-			
-			//check if the correct message is displayed
-			if(currentEle.getText().equals("There are currently no tasks.")) {
-				System.out.println("Correct message is shown.");
-			}//if
-			else {
-				System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
-			}//else
+		if(confirmElementById(currentEle, elementPath) > 0){
+			errorCtr++;
+			System.out.println("ERROR- Empty tasks message is not shown. " + currentEle.getAttribute("id") + " is shown.");
 		}//if
 		else {
-			System.out.println("ERROR- Empty tasks message is not shown. " + currentEle.getAttribute("id") + " is shown.");
+			//check if the correct message is displayed
+			elementPath = "There are currently no tasks.";
+			if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+			}//if
+			else {}//else
 		}//else
 		
 		//check "0 active items left" is shown
 		elementPath = "items-left";
 		currentEle = setElementById(driver, elementPath);
-		if(currentEle.getText().equals("0 active items left")) {
-			System.out.println("Correct 0 items left message is shown.");
-		}//if
-		else {
+		elementPath = "0 active items left";
+		if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
+			errorCtr++;
 			System.out.println("ERROR- 0 active items left message is not shown.");
-		}//else
+		}//if
+		else {}//else
 		
 		//click active tab
 		elementPath = "active";
 		currentEle = getSpecificFilterTab(driver, elementPath);
 		elementPath = "Active";
-		if(currentEle.getText().equals(elementPath)) {
-			System.out.println("The correct filter tab was found.");
-			clickElement(currentEle);
-			currentTab = getActiveFilterTab(driver);
-			System.out.println("The current active filter is: " + currentTab + ".");
+		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Found tab is not correct.");
 		}//if
 		else {
-			System.out.println("ERROR- The incorrect filter tab was found.");
+			clickElement(currentEle);
+			if(confirmTabName(currentEle.getText(), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Clicked tab is not correct.");
+			}//if
+			else {}//else
 		}//else
 		
 		//check "There are currently no active tasks."
+		//call setElementById to find the element that displays the empty state
+		elementPath = "empty-state";
+		currentEle = setElementByClass(driver, elementPath);
+		if(confirmElementByClass(currentEle, elementPath) > 0){
+			errorCtr++;
+			System.out.println("ERROR- Empty state is not shown. " + currentEle.getAttribute("class") + " is shown.");
+		}//if
+		else {}//else
 		
+		//call setElementById to find the element that displays the no tasks message
+		elementPath = "empty-task-message";
+		currentEle = setElementById(driver, elementPath);
+		if(confirmElementById(currentEle, elementPath) > 0){
+			errorCtr++;
+			System.out.println("ERROR- Empty tasks message is not shown. " + currentEle.getAttribute("id") + " is shown.");
+		}//if
+		else {
+			//check if the correct message is displayed
+			elementPath = "There are currently no active tasks.";
+			if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+			}//if
+			else {}//else
+		}//else
+
 		//click completed tab
+		elementPath = "completed";
+		currentEle = getSpecificFilterTab(driver, elementPath);
+		elementPath = "Completed";
+		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Found tab is not correct.");
+		}//if
+		else {
+			clickElement(currentEle);
+			if(confirmTabName(currentEle.getText(), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Clicked tab is not correct.");
+			}//if
+			else {}//else
+		}//else
+		
 		//check "There are currently no completed tasks."
+		elementPath = "empty-state";
+		currentEle = setElementByClass(driver, elementPath);
+		if(confirmElementByClass(currentEle, elementPath) > 0){
+			errorCtr++;
+			System.out.println("ERROR- Empty state is not shown. " + currentEle.getAttribute("class") + " is shown.");
+		}//if
+		else {}//else
+		
+		//call setElementById to find the element that displays the no tasks message
+		elementPath = "empty-task-message";
+		currentEle = setElementById(driver, elementPath);
+		if(confirmElementById(currentEle, elementPath) > 0){
+			errorCtr++;
+			System.out.println("ERROR- Empty tasks message is not shown. " + currentEle.getAttribute("id") + " is shown.");
+		}//if
+		else {
+			//check if the correct message is displayed
+			elementPath = "There are currently no completed tasks.";
+			if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+			}//if
+			else {}//else
+		}//else
 		
 		//click all tab
+		elementPath = "all";
+		currentEle = getSpecificFilterTab(driver, elementPath);
+		elementPath = "All";
+		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Found tab is not correct.");
+		}//if
+		else {
+			clickElement(currentEle);
+			if(confirmTabName(currentEle.getText(), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Clicked tab is not correct.");
+			}//if
+			else {}//else
+		}//else
 		
 		//click text bar
 		//input "wash the car" into text bar
@@ -290,6 +455,8 @@ public class Testing {
 		
 		//etc................
 		
+		//relay error count
+		System.out.print("Testing complete. Found " + errorCtr + " error" + ((errorCtr != 1) ? "s" : "") + " in the test run.");
 		
 		//end the session ALWAYS NEEDED
 		endSession(driver);
