@@ -106,7 +106,7 @@ public class Testing {
 		//while there are still tabs to check,
 		while(a1.hasNext() && a2.hasNext()) {
 			//check if the current tab is matching tab being searched for
-			if(a2.next().getText().equals(tab)) {
+			if(a2.next().getAttribute("data-filter").equals(tab)) {
 				//matching tab, return tab
 				return a1.next();
 			}//if
@@ -238,6 +238,7 @@ public class Testing {
 		//click active tab
 		elementPath = "active";
 		currentEle = getSpecificFilterTab(driver, elementPath);
+		elementPath = "Active";
 		if(currentEle.getText().equals(elementPath)) {
 			System.out.println("The correct filter tab was found.");
 			clickElement(currentEle);
