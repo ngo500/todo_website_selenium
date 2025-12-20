@@ -228,6 +228,15 @@ public class Testing {
 		else {}//else
 		return errorCount;
 	}//confirmMessageText
+
+	/**
+	 * This method takes a given WebElement that can receive input and sends it the given String input.
+	 * @param currentEle The WebElement being sent input.
+	 * @param text The String being input into the given WebElement.
+	 */
+	public static void sendText(WebElement currentEle, String text) {
+		currentEle.sendKeys(text);
+	}//sendText
 	
 	public static void main(String[] args) throws InterruptedException {
 		
@@ -422,7 +431,14 @@ public class Testing {
 		}//else
 		
 		//click text bar
+		elementPath = "task-input";
+		currentEle = setElementById(driver, elementPath);
+		clickElement(currentEle);
+		
 		//input "wash the car" into text bar
+		elementPath = "wash the car";
+		sendText(currentEle, elementPath);
+		
 		//press add button
 		//confirm "wash the car" is shown
 		//confirm all tab is still clicked
