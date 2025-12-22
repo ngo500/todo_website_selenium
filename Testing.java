@@ -1,7 +1,6 @@
 package todo_website_testing;
 import java.util.Iterator;
 import java.util.List;
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -63,6 +62,38 @@ public class Testing {
 		List<WebElement> tabList = driver.findElements(By.xpath(elementPath));
 		return tabList;
 	}//getFilterTabList
+	
+	/**
+	 * This method takes a given WebDriver and returns a List<WebElement> of all the list items in a list
+	 * @param driver The WebDriver being used for the automation.
+	 * @return The List<WebElement> of all list items.
+	 */
+	public static List<WebElement> getTodoItemList(WebDriver driver){
+		//set path of todo items
+		String elementPath = "//*[@id=\"todos-list\"]/li";
+		//save filters in a List of WebElements
+		List<WebElement> tabList = driver.findElements(By.xpath(elementPath));
+		return tabList;
+	}//getTodoItemList
+	
+	/**
+	 * This method takes a given WebDriver and returns the last item added to a List<WebElement> as a WebElement.
+	 * @param driver The given WebDriver being used for the automation.
+	 * @return The WebElement that was last added to the List<WebElement>. 
+	 * If the List<WebElement> is empty, returns a null WebElement.
+	 */
+	public static WebElement getLastTodoListItem(WebDriver driver) {
+		//call getTodoItemList to get the items
+		List<WebElement> itemList = getTodoItemList(driver);
+		WebElement lastTodoListItem;
+		if(itemList.size() > 0) {
+			lastTodoListItem = itemList.get(itemList.size() - 1);
+		}//if
+		else {
+			lastTodoListItem = null;
+		}//else
+		return lastTodoListItem;
+	}//getLastTodoListItem
 	
 	/**
 	 * This method takes a given WebDriver and returns the name of the active tab from a list of all tabs.
@@ -228,7 +259,7 @@ public class Testing {
 		else {}//else
 		return errorCount;
 	}//confirmMessageText
-
+	
 	/**
 	 * This method takes a given WebElement that can receive input and sends it the given String input.
 	 * @param currentEle The WebElement being sent input.
@@ -237,6 +268,62 @@ public class Testing {
 	public static void sendText(WebElement currentEle, String text) {
 		currentEle.sendKeys(text);
 	}//sendText
+	
+	/**
+	 * This method takes a given WebElement that has a placeholder text and confirms it matches the given String.
+	 * @param currentEle The given WebElement containing placeholder text to check.
+	 * @param elementPath The given String to use to check the placeholder text against.
+	 * @return The int that shows the result of the comparison. 
+	 * The int is 0 if there there is a match, and a 1 if the given text does not match.
+	 */
+	public static int confirmPlaceholderText(WebElement currentEle, String elementPath) {
+		int errorCount = 0;
+		if(!(currentEle.getAttribute("placeholder").equals(elementPath))){
+			errorCount++;
+		}//if
+		else {}//else
+		return errorCount;
+	}//confirmPlaceholderText
+	
+	/**
+	 * This method takes a given WebElement that can receive input text and confirms it matches the given String.
+	 * @param currentEle The given WebElement containing input text to check.
+	 * @param elementPath The given String to use to check the input text against.
+	 * @return The int that shows the result of the comparison. 
+	 * The int is 0 if there there is a match, and a 1 if the given text does not match.
+	 */
+	public static int confirmInputBarText(WebElement currentEle, String elementPath) {
+		int errorCount = 0;
+		if(!(currentEle.getAttribute("value").equals(elementPath))){
+			errorCount++;
+		}//if
+		else {}//else
+		return errorCount;
+	}//confirmInputBarText
+	
+	/**
+	 * This method takes a given WebElement that can receive input text and confirms it is null.
+	 * @param currentEle The given WebElement containing input text to check.
+	 * @return The int that shows the result of the comparison. 
+	 * The int is 0 if there there is a match, and a 1 if the given text does not match.
+	 */
+	public static int confirmInputBarTextEmpty(WebElement currentEle) {
+		int errorCount = 0;
+		if(!(currentEle.getAttribute("value") == null || currentEle.getAttribute("value").isEmpty())){
+			errorCount++;
+		}//if
+		else {}//else
+		return errorCount;
+	}//confirmInputBarText
+	
+	/**
+	 * This method takes a given WebElement that is a todo list item from the todo list and returns the text in String format.
+	 * @param currentEle The given WebElement to get the text from.
+	 * @return The text for the given WebElement todo item in String format.
+	 */
+	public static String getTodoItemText(WebElement currentEle) {
+		return currentEle.getText();
+	}//getTodoItemText
 	
 	public static void main(String[] args) throws InterruptedException {
 		
@@ -433,14 +520,82 @@ public class Testing {
 		//click text bar
 		elementPath = "task-input";
 		currentEle = setElementById(driver, elementPath);
+		
+		//confirm there is nothing in the input bar before clicking
+		if(confirmInputBarTextEmpty(currentEle) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+		}//if
+		else {}//else
+		//confirm placeholder text is correct before clicking
+		elementPath = "What task would you like to add to your to-do list?";
+		if(confirmPlaceholderText(currentEle, elementPath)  > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Placeholder text is not correct.");
+		}//if
+		else {}//else
+		
 		clickElement(currentEle);
+		//make sure placeholder text is still correct after clicking but before input
+		if(confirmPlaceholderText(currentEle, elementPath)  > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Placeholder text is not correct.");
+		}//if
+		else {}//else
+		//make sure input bar text is still empty after clicking but before input
+		if(confirmInputBarTextEmpty(currentEle) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+		}//if
+		else {}//else
 		
 		//input "wash the car" into text bar
 		elementPath = "wash the car";
 		sendText(currentEle, elementPath);
+		//check the input text is in the bar
+		if(confirmInputBarText(currentEle, elementPath) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+		}//if
+		else {}//else
 		
 		//press add button
+		elementPath = "button-add-task";
+		currentEle = setElementById(driver, elementPath);
+		clickElement(currentEle);
+		
+		//check that the input bar is cleared after add button is pressed
+		elementPath = "task-input";
+		currentEle = setElementById(driver, elementPath);
+		if(confirmInputBarTextEmpty(currentEle) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+		}//if
+		else {}//else
+		
+		//confirm placeholder text is correct again
+		elementPath = "What task would you like to add to your to-do list?";
+		if(confirmPlaceholderText(currentEle, elementPath)  > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Placeholder text is not correct.");
+		}//if
+		else {}//else
+		
 		//confirm "wash the car" is shown
+		currentEle = getLastTodoListItem(driver);
+		if(currentEle == null) {
+			errorCtr++;
+			System.out.println("ERROR- Todo list is empty.");
+		}//if
+		else {
+			elementPath = "wash the car";
+			if(confirmMessageText(getTodoItemText(currentEle), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Incorrect todo item shown. \"" + getTodoItemText(currentEle) + "\" is the incorrect message.");
+			}//if
+			else {}//else
+		}//else
+		
 		//confirm all tab is still clicked
 		//confirm "1 active item left" is shown
 		
