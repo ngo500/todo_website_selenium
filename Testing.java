@@ -96,6 +96,50 @@ public class Testing {
 	}//getLastTodoListItem
 	
 	/**
+	 * This method takes a given WebDriver and a given String of the element to find in the Todo list, and returns the item.
+	 * @param driver The given WebDriver being used for the automation.
+	 * @param givenItem The String format text of the WebElement being searched for in the Todo list.
+	 * @return The WebElement of the matching item in the Todo list.
+	 * If the WebElement is not found, returns a null WebElement.
+	 */
+	public static WebElement getSpecificTodoListItem(WebDriver driver, String givenItem) {
+		//call getTodoItemList to get the items
+		List<WebElement> itemList = getTodoItemList(driver);
+		WebElement getTodoListItem;
+		if(itemList.size() > 0) {
+			//iterators to go through list
+			Iterator<WebElement> a1 = itemList.iterator();
+			Iterator<WebElement> a2 = itemList.iterator();
+			
+			//while there are still items to check,
+			while(a1.hasNext() && a2.hasNext()) {
+				//check if the current tab is the active tab
+				if(a2.next().getText().equals(givenItem)) {
+					//active filter, return tab name
+					getTodoListItem = a1.next();
+					return getTodoListItem;
+				}//if
+				else {
+					//else, not the active filter, keep going
+					a1.next();
+				}//else
+			}//while
+		}//if
+		else {}//else
+		getTodoListItem = null;
+		return getTodoListItem;
+	}//getSpecificTodoListItem
+	
+	/**
+	 * This method takes a given WebElement list item and returns its corresponding checkmark.
+	 * @param currentEle The given WebElement that is a todo list item.
+	 * @return The corresponding checkmark of the todo list item in WebElement format.
+	 */
+	public static WebElement getTodoListItemCheckmark(WebElement currentEle) {
+		return currentEle.findElement(By.className("checkmark"));
+	}//getTodoListItemCheckbox
+	
+	/**
 	 * This method takes a given WebDriver and returns the name of the active tab from a list of all tabs.
 	 * @param driver The WebDriver being used for the automation.
 	 * @return The name of the active tab in String format. If no active filter is found, ERROR is returned in String format.
@@ -305,7 +349,7 @@ public class Testing {
 	 * This method takes a given WebElement that can receive input text and confirms it is null.
 	 * @param currentEle The given WebElement containing input text to check.
 	 * @return The int that shows the result of the comparison. 
-	 * The int is 0 if there there is a match, and a 1 if the given text does not match.
+	 * The int is 0 if there is a match, and a 1 if the given text does not match.
 	 */
 	public static int confirmInputBarTextEmpty(WebElement currentEle) {
 		int errorCount = 0;
@@ -324,6 +368,36 @@ public class Testing {
 	public static String getTodoItemText(WebElement currentEle) {
 		return currentEle.getText();
 	}//getTodoItemText
+	
+	/**
+	 * This method takes a given WebElement that is a todo list checkmark from the todolist and confirms it is clicked.
+	 * @param currentEle The given WebElement containing the checkmark to check.
+	 * @return The int that shows the result of the comparison. 
+	 * The int is 0 if there the checkmark is clicked, and a 1 if it is not clicked.
+	 */
+	public static int confirmCheckmarkClicked(WebElement currentEle) {
+		int errorCount = 0;
+		if(!(currentEle.isSelected())){
+			errorCount++;
+		}//if
+		else {}//else
+		return errorCount;
+	}//confirmCheckmarkClicked
+	
+	/**
+	 * This method takes a given WebElement that is a todo list checkmark from the todolist and confirms it is not clicked.
+	 * @param currentEle The given WebElement containing the checkmark to check.
+	 * @return The int that shows the result of the comparison. 
+	 * The int is 0 if there the checkmark is not clicked, and a 1 if it is clicked.
+	 */
+	public static int confirmCheckmarkNotClicked(WebElement currentEle) {
+		int errorCount = 0;
+		if(!(currentEle.isSelected())){
+			errorCount++;
+		}//if
+		else {}//else
+		return errorCount;
+	}//confirmCheckmarkNotClicked
 	
 	public static void main(String[] args) throws InterruptedException {
 		
@@ -702,6 +776,37 @@ public class Testing {
 		}//else
 		
 		//click the checkbox next to "wash the car"
+		elementPath = "wash the car";
+		currentEle = getSpecificTodoListItem(driver, elementPath);
+		if(currentEle == null) {
+			errorCtr++;
+			System.out.println("ERROR- Todo list item \" elementPath \" is not found.");
+		}//if
+		else {
+			if(confirmMessageText(getTodoItemText(currentEle), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Incorrect todo item shown. \"" + getTodoItemText(currentEle) + "\" is the incorrect message.");
+			}//if
+			else {}//else
+		}//else
+		
+		//get the checkbox
+		currentEle = getTodoListItemCheckmark(currentEle);
+		//confirm the checkbox is not checked yet
+		if(confirmCheckmarkNotClicked(currentEle) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Checkmark is already clicked.");
+		}//if
+		else {
+			clickElement(currentEle);
+			//confirm the checkbox is now checked
+			if(confirmCheckmarkClicked(currentEle) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Checkmark is not clicked.");
+			}//if
+			else {}//else
+		}//else
+		
 		//confirm the tab is still all tab
 		//confirm "wash the car" is marked as completed
 		//confirm "0 active items left" is shown
