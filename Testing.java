@@ -392,7 +392,7 @@ public class Testing {
 	 */
 	public static int confirmCheckmarkNotClicked(WebElement currentEle) {
 		int errorCount = 0;
-		if(!(currentEle.isSelected())){
+		if(currentEle.isSelected()){
 			errorCount++;
 		}//if
 		else {}//else
