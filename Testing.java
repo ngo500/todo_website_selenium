@@ -140,6 +140,51 @@ public class Testing {
 	}//getTodoListItemCheckbox
 	
 	/**
+	 * This method takes a given WebDriver and returns the current size of the task list.
+	 * @param driver The given WebDriver being used for automation.
+	 * @return The size of the task list in int format. Returns 0 if the list is empty.
+	 */
+	public static int getTaskListSize(WebDriver driver) {
+		int size = 0;
+		//call getTodoItemList to get the items
+		List<WebElement> itemList = getTodoItemList(driver);
+		size = itemList.size();
+		return size;
+	}//getTaskListSize
+	
+	/**
+	 * 
+	 * @param driver
+	 * @return
+	 */
+	public static int getActiveTaskListSize(WebDriver driver) {
+		int size = 0;
+		
+		//call getTodoItemList to get the items
+		List<WebElement> itemList = getTodoItemList(driver);
+		List<WebElement> activeList = null;
+		
+		if(itemList.size() > 0) {
+			//iterators to go through list
+			Iterator<WebElement> a1 = itemList.iterator();
+			Iterator<WebElement> a2 = itemList.iterator();
+			
+			//while there are still items to check,
+			while(a1.hasNext() && a2.hasNext()) {
+				//check if the current item is active
+				//if active, add to new list
+				//activeList.add(a1.next())
+				//else not active, skip
+			}//while
+		}//if
+		else {}//else
+		//set size as the active list
+		size = activeList.size();	
+		
+		return size;
+	}//getActiveTaskListSize
+	
+	/**
 	 * This method takes a given WebDriver and returns the name of the active tab from a list of all tabs.
 	 * @param driver The WebDriver being used for the automation.
 	 * @return The name of the active tab in String format. If no active filter is found, ERROR is returned in String format.
@@ -399,6 +444,257 @@ public class Testing {
 		return errorCount;
 	}//confirmCheckmarkNotClicked
 	
+	/**
+	 * 
+	 * @param driver
+	 * @param elementPath
+	 * @return
+	 */
+	public static int confirmActiveTab(WebDriver driver, String elementPath) {
+		String currentTab = getActiveFilterTab(driver);
+		if(confirmTabName(currentTab, elementPath) > 0) {
+			System.out.println("ERROR- Default tab is not correct.");
+			return 1;
+		}//if
+		else {
+			return 0;
+		}//else
+	}//confirmActiveTab
+	
+	/**
+	 * 
+	 * @param driver
+	 * @param elementPath
+	 * @return
+	 */
+	public static int clickTab(WebDriver driver, String elementPath) {
+		WebElement currentEle = getSpecificFilterTab(driver, elementPath);
+		elementPath = elementPath.substring(0, 1).toUpperCase() + elementPath.substring(1);
+		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
+			System.out.println("ERROR- Found tab is not correct.");
+			return 1;
+		}//if
+		else {
+			clickElement(currentEle);
+			if(confirmTabName(currentEle.getText(), elementPath) > 0) {
+				System.out.println("ERROR- Clicked tab is not correct.");
+				return 1;
+			}//if
+			else {
+				return 0;
+			}//else
+		}//else
+	}//clickTab
+	
+	/**
+	 * 
+	 * @param driver
+	 * @param tabName
+	 * @return
+	 */
+	public static int confirmEmptyState(WebDriver driver, String tabName) {
+		//set error counter
+		int errorCtr = 0;
+		//call setElementById to find the element that displays the empty state
+		String elementPath = "empty-state";
+		WebElement currentEle = setElementByClass(driver, elementPath);
+		if(confirmElementByClass(currentEle, elementPath) > 0){
+			errorCtr++;
+			System.out.println("ERROR- Empty state is not shown. " + currentEle.getAttribute("class") + " is shown.");
+		}//if
+		else {}//else
+
+		//call setElementByXPath to find the element that displays the clipboard picture
+		elementPath = "/html/body/div/div[3]/div/i";
+		currentEle = setElementByXPath(driver, elementPath);
+		elementPath = "fas fa-clipboard-list";
+		if(confirmElementByClass(currentEle, elementPath) > 0){
+			errorCtr++;
+			System.out.println("ERROR- Clipboard art is not shown. " + currentEle.getAttribute("class") + " is shown.");
+		}//if
+		else {}//else
+
+		//call setElementById to find the element that displays the no tasks message
+		elementPath = "empty-task-message";
+		currentEle = setElementById(driver, elementPath);
+		if(confirmElementById(currentEle, elementPath) > 0){
+			errorCtr++;
+			System.out.println("ERROR- Empty tasks message is not shown. " + currentEle.getAttribute("id") + " is shown.");
+		}//if
+		else {
+			//check if the correct message is displayed
+			elementPath = tabName;
+			if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+			}//if
+			else {}//else
+		}//else
+
+		//check "0 active items left" is shown
+		elementPath = "items-left";
+		currentEle = setElementById(driver, elementPath);
+		elementPath = "0 active items left";
+		if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- 0 active items left message is not shown.");
+		}//if
+		else {}//else
+		
+		return errorCtr;
+	}//confirmEmptyState
+	
+	public static int confirmItemsLeft(WebDriver driver) {
+		int errorCtr = 0;
+		int size = getTaskListSize(driver);
+		String elementPath = "items-left";
+		WebElement currentEle = setElementById(driver, elementPath);
+		if(size == 1) {
+			//check "1 active item left" is shown
+			elementPath = "1 active item left";
+			if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- 1 active item left message is not shown.");
+			}//if
+			else {}//else
+		}//if
+		else if(size > 1) {
+			//check ">1 active items left" is shown
+			elementPath = size + " active items left";
+			if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- " + size + " active items left message is not shown.");
+			}//if
+			else {}//else
+		}//else if
+		else{
+			//check "0 active items left" is shown
+			elementPath = "0 active items left";
+			if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- 0 active items left message is not shown.");
+			}//if
+			else {}//else
+		}//else
+		return errorCtr;
+	}//confirmItemsLeft
+	
+	/**
+	 * 
+	 * @param driver
+	 * @param taskMsg
+	 * @return
+	 */
+	public static int addTask(WebDriver driver, String taskMsg) {
+		//set int to store errors
+		int errorCtr = 0;
+		//click text bar
+		String elementPath = "task-input";
+		WebElement currentEle = setElementById(driver, elementPath);
+
+		//confirm there is nothing in the input bar before clicking
+		if(confirmInputBarTextEmpty(currentEle) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+		}//if
+		else {
+			//confirm placeholder text is correct before clicking
+			elementPath = "What task would you like to add to your to-do list?";
+			if(confirmPlaceholderText(currentEle, elementPath)  > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Placeholder text is not correct.");
+			}//if
+			else {}//else
+			
+			clickElement(currentEle);
+			//make sure placeholder text is still correct after clicking but before input
+			if(confirmPlaceholderText(currentEle, elementPath)  > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Placeholder text is not correct.");
+			}//if
+			else {}//else
+			//make sure input bar text is still empty after clicking but before input
+			if(confirmInputBarTextEmpty(currentEle) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+			}//if
+			else {
+				//input "wash the car" into text bar
+				elementPath = taskMsg;
+				sendText(currentEle, elementPath);
+				//check the input text is in the bar
+				if(confirmInputBarText(currentEle, elementPath) > 0) {
+					errorCtr++;
+					System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+				}//if
+				else {
+					//press add button
+					elementPath = "button-add-task";
+					currentEle = setElementById(driver, elementPath);
+					clickElement(currentEle);
+					
+					//check that the input bar is cleared after add button is pressed
+					elementPath = "task-input";
+					currentEle = setElementById(driver, elementPath);
+					if(confirmInputBarTextEmpty(currentEle) > 0) {
+						errorCtr++;
+						System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
+					}//if
+					else {}//else
+					
+					//confirm placeholder text is correct again
+					elementPath = "What task would you like to add to your to-do list?";
+					if(confirmPlaceholderText(currentEle, elementPath)  > 0) {
+						errorCtr++;
+						System.out.println("ERROR- Placeholder text is not correct.");
+					}//if
+					else {}//else
+					
+					//confirm "wash the car" is shown
+					currentEle = getLastTodoListItem(driver);
+					if(currentEle == null) {
+						errorCtr++;
+						System.out.println("ERROR- Todo list is empty.");
+					}//if
+					else {
+						elementPath = "wash the car";
+						if(confirmMessageText(getTodoItemText(currentEle), elementPath) > 0) {
+							errorCtr++;
+							System.out.println("ERROR- Incorrect todo item shown. \"" + getTodoItemText(currentEle) + "\" is the incorrect message.");
+						}//if
+						else {}//else
+					}//else
+				}//else
+			}//else
+		}//else
+		
+		return errorCtr;
+	}//addTask
+	
+	/**
+	 * 
+	 * @param driver
+	 * @param elementPath
+	 * @return
+	 */
+	public static int confirmLastTodoListItem(WebDriver driver, String elementPath) {
+		int errorCtr = 0;
+		WebElement currentEle = getLastTodoListItem(driver);
+		if(currentEle == null) {
+			errorCtr++;
+			System.out.println("ERROR- Todo list is empty.");
+		}//if
+		else {
+			if(confirmMessageText(getTodoItemText(currentEle), elementPath) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Incorrect todo item shown. \"" + getTodoItemText(currentEle) + "\" is the incorrect message.");
+			}//if
+			else {}//else
+		}//else
+		return errorCtr;
+	}//confirmLastTodoListItem
+	
+	
 	public static void main(String[] args) throws InterruptedException {
 		
 		//set up a new driver to open up firefox using startSession()
@@ -433,351 +729,68 @@ public class Testing {
 		//confirm default tab shown in "All"
 		//call getActiveFilterTab to get the name of the current active filter tab
 		String elementPath = "All";
-		String currentTab = getActiveFilterTab(driver);
-		if(confirmTabName(currentTab, elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Default tab is not correct.");
-		}//if
-		else {}//else
+		String allTabMsg = "There are currently no tasks.";
+		errorCtr += confirmActiveTab(driver, elementPath);
 		
 		//check "There are currently no tasks." is shown
-		//call setElementById to find the element that displays the empty state
-		elementPath = "empty-state";
-		WebElement currentEle = setElementByClass(driver, elementPath);
-		if(confirmElementByClass(currentEle, elementPath) > 0){
-			errorCtr++;
-			System.out.println("ERROR- Empty state is not shown. " + currentEle.getAttribute("class") + " is shown.");
-		}//if
-		else {}//else
-		
-		//call setElementByXPath to find the element that displays the clipboard picture
-		elementPath = "/html/body/div/div[3]/div/i";
-		currentEle = setElementByXPath(driver, elementPath);
-		elementPath = "fas fa-clipboard-list";
-		if(confirmElementByClass(currentEle, elementPath) > 0){
-			errorCtr++;
-			System.out.println("ERROR- Clipboard art is not shown. " + currentEle.getAttribute("class") + " is shown.");
-		}//if
-		else {}//else
-		
-		//call setElementById to find the element that displays the no tasks message
-		elementPath = "empty-task-message";
-		currentEle = setElementById(driver, elementPath);
-		if(confirmElementById(currentEle, elementPath) > 0){
-			errorCtr++;
-			System.out.println("ERROR- Empty tasks message is not shown. " + currentEle.getAttribute("id") + " is shown.");
-		}//if
-		else {
-			//check if the correct message is displayed
-			elementPath = "There are currently no tasks.";
-			if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
-			}//if
-			else {}//else
-		}//else
-		
-		//check "0 active items left" is shown
-		elementPath = "items-left";
-		currentEle = setElementById(driver, elementPath);
-		elementPath = "0 active items left";
-		if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- 0 active items left message is not shown.");
-		}//if
-		else {}//else
+		errorCtr += confirmEmptyState(driver, allTabMsg);
 		
 		//click active tab
 		elementPath = "active";
-		currentEle = getSpecificFilterTab(driver, elementPath);
-		elementPath = "Active";
-		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Found tab is not correct.");
-		}//if
-		else {
-			clickElement(currentEle);
-			if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Clicked tab is not correct.");
-			}//if
-			else {}//else
-		}//else
+		errorCtr += clickTab(driver, elementPath);
 		
 		//check "There are currently no active tasks."
-		//call setElementById to find the element that displays the empty state
-		elementPath = "empty-state";
-		currentEle = setElementByClass(driver, elementPath);
-		if(confirmElementByClass(currentEle, elementPath) > 0){
-			errorCtr++;
-			System.out.println("ERROR- Empty state is not shown. " + currentEle.getAttribute("class") + " is shown.");
-		}//if
-		else {}//else
-		
-		//call setElementById to find the element that displays the no tasks message
-		elementPath = "empty-task-message";
-		currentEle = setElementById(driver, elementPath);
-		if(confirmElementById(currentEle, elementPath) > 0){
-			errorCtr++;
-			System.out.println("ERROR- Empty tasks message is not shown. " + currentEle.getAttribute("id") + " is shown.");
-		}//if
-		else {
-			//check if the correct message is displayed
-			elementPath = "There are currently no active tasks.";
-			if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
-			}//if
-			else {}//else
-		}//else
+		String activeTabMsg = "There are currently no active tasks.";
+		errorCtr += confirmEmptyState(driver, activeTabMsg);
 
 		//click completed tab
 		elementPath = "completed";
-		currentEle = getSpecificFilterTab(driver, elementPath);
-		elementPath = "Completed";
-		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Found tab is not correct.");
-		}//if
-		else {
-			clickElement(currentEle);
-			if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Clicked tab is not correct.");
-			}//if
-			else {}//else
-		}//else
+		errorCtr += clickTab(driver, elementPath);
 		
 		//check "There are currently no completed tasks."
-		elementPath = "empty-state";
-		currentEle = setElementByClass(driver, elementPath);
-		if(confirmElementByClass(currentEle, elementPath) > 0){
-			errorCtr++;
-			System.out.println("ERROR- Empty state is not shown. " + currentEle.getAttribute("class") + " is shown.");
-		}//if
-		else {}//else
-		
-		//call setElementById to find the element that displays the no tasks message
-		elementPath = "empty-task-message";
-		currentEle = setElementById(driver, elementPath);
-		if(confirmElementById(currentEle, elementPath) > 0){
-			errorCtr++;
-			System.out.println("ERROR- Empty tasks message is not shown. " + currentEle.getAttribute("id") + " is shown.");
-		}//if
-		else {
-			//check if the correct message is displayed
-			elementPath = "There are currently no completed tasks.";
-			if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
-			}//if
-			else {}//else
-		}//else
+		String completedTabMsg = "There are currently no completed tasks.";
+		errorCtr += confirmEmptyState(driver, completedTabMsg);
 		
 		//click all tab
 		elementPath = "all";
-		currentEle = getSpecificFilterTab(driver, elementPath);
-		elementPath = "All";
-		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Found tab is not correct.");
-		}//if
-		else {
-			clickElement(currentEle);
-			if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Clicked tab is not correct.");
-			}//if
-			else {}//else
-		}//else
+		errorCtr += clickTab(driver, elementPath);
 		
-		//click text bar
-		elementPath = "task-input";
-		currentEle = setElementById(driver, elementPath);
-		
-		//confirm there is nothing in the input bar before clicking
-		if(confirmInputBarTextEmpty(currentEle) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
-		}//if
-		else {}//else
-		//confirm placeholder text is correct before clicking
-		elementPath = "What task would you like to add to your to-do list?";
-		if(confirmPlaceholderText(currentEle, elementPath)  > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Placeholder text is not correct.");
-		}//if
-		else {}//else
-		
-		clickElement(currentEle);
-		//make sure placeholder text is still correct after clicking but before input
-		if(confirmPlaceholderText(currentEle, elementPath)  > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Placeholder text is not correct.");
-		}//if
-		else {}//else
-		//make sure input bar text is still empty after clicking but before input
-		if(confirmInputBarTextEmpty(currentEle) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
-		}//if
-		else {}//else
-		
-		//input "wash the car" into text bar
+		//put input in text bar and add
 		elementPath = "wash the car";
-		sendText(currentEle, elementPath);
-		//check the input text is in the bar
-		if(confirmInputBarText(currentEle, elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
-		}//if
-		else {}//else
-		
-		//press add button
-		elementPath = "button-add-task";
-		currentEle = setElementById(driver, elementPath);
-		clickElement(currentEle);
-		
-		//check that the input bar is cleared after add button is pressed
-		elementPath = "task-input";
-		currentEle = setElementById(driver, elementPath);
-		if(confirmInputBarTextEmpty(currentEle) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Incorrect message shown. \"" + currentEle.getText() + "\" is the incorrect message.");
-		}//if
-		else {}//else
-		
-		//confirm placeholder text is correct again
-		elementPath = "What task would you like to add to your to-do list?";
-		if(confirmPlaceholderText(currentEle, elementPath)  > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Placeholder text is not correct.");
-		}//if
-		else {}//else
-		
-		//confirm "wash the car" is shown
-		currentEle = getLastTodoListItem(driver);
-		if(currentEle == null) {
-			errorCtr++;
-			System.out.println("ERROR- Todo list is empty.");
-		}//if
-		else {
-			elementPath = "wash the car";
-			if(confirmMessageText(getTodoItemText(currentEle), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Incorrect todo item shown. \"" + getTodoItemText(currentEle) + "\" is the incorrect message.");
-			}//if
-			else {}//else
-		}//else
+		errorCtr += addTask(driver, elementPath);
 		
 		//confirm all tab is still clicked
-		elementPath = "all";
-		currentEle = getSpecificFilterTab(driver, elementPath);
 		elementPath = "All";
-		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Found tab is not correct.");
-		}//if
-		else {}//else
+		errorCtr += confirmActiveTab(driver, elementPath);
 		
 		//confirm "1 active item left" is shown
-		elementPath = "items-left";
-		currentEle = setElementById(driver, elementPath);
-		elementPath = "1 active item left";
-		if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- 1 active item left message is not shown.");
-		}//if
-		else {}//else
+		errorCtr += confirmItemsLeft(driver);
 		
 		//click active tab
 		elementPath = "active";
-		currentEle = getSpecificFilterTab(driver, elementPath);
-		elementPath = "Active";
-		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Found tab is not correct.");
-		}//if
-		else {
-			clickElement(currentEle);
-			if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Clicked tab is not correct.");
-			}//if
-			else {}//else
-		}//else
+		errorCtr += clickTab(driver, elementPath);
 		
 		//confirm "wash the car" is still shown
-		currentEle = getLastTodoListItem(driver);
-		if(currentEle == null) {
-			errorCtr++;
-			System.out.println("ERROR- Todo list is empty.");
-		}//if
-		else {
-			elementPath = "wash the car";
-			if(confirmMessageText(getTodoItemText(currentEle), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Incorrect todo item shown. \"" + getTodoItemText(currentEle) + "\" is the incorrect message.");
-			}//if
-			else {}//else
-		}//else
+		elementPath = "wash the car";
+		errorCtr  += confirmLastTodoListItem(driver, elementPath);
 		
 		//confirm "1 active item left" is shown
-		elementPath = "items-left";
-		currentEle = setElementById(driver, elementPath);
-		elementPath = "1 active item left";
-		if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- 1 active item left message is not shown.");
-		}//if
-		else {}//else
+		errorCtr += confirmItemsLeft(driver);
 		
 		//click completed tab
 		elementPath = "completed";
-		currentEle = getSpecificFilterTab(driver, elementPath);
-		elementPath = "Completed";
-		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Found tab is not correct.");
-		}//if
-		else {
-			clickElement(currentEle);
-			if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Clicked tab is not correct.");
-			}//if
-			else {}//else
-		}//else
+		errorCtr += clickTab(driver, elementPath);
 		
 		//confirm "There are currently no completed tasks." is still shown
-		elementPath = "empty-state";
-		currentEle = setElementByClass(driver, elementPath);
-		if(confirmElementByClass(currentEle, elementPath) > 0){
-			errorCtr++;
-			System.out.println("ERROR- Empty state is not shown. " + currentEle.getAttribute("class") + " is shown.");
-		}//if
-		else {}//else
+		errorCtr += confirmEmptyState(driver, completedTabMsg);
 		
 		//click all tab
 		elementPath = "all";
-		currentEle = getSpecificFilterTab(driver, elementPath);
-		elementPath = "All";
-		if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Found tab is not correct.");
-		}//if
-		else {
-			clickElement(currentEle);
-			if(confirmTabName(currentEle.getText(), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Clicked tab is not correct.");
-			}//if
-			else {}//else
-		}//else
+		errorCtr += clickTab(driver, elementPath);
 		
 		//click the checkbox next to "wash the car"
 		elementPath = "wash the car";
-		currentEle = getSpecificTodoListItem(driver, elementPath);
+		WebElement currentEle = getSpecificTodoListItem(driver, elementPath);
 		if(currentEle == null) {
 			errorCtr++;
 			System.out.println("ERROR- Todo list item \" elementPath \" is not found.");
@@ -800,6 +813,13 @@ public class Testing {
 		else {
 			clickElement(currentEle);
 			//confirm the checkbox is now checked
+			elementPath = "wash the car";
+			currentEle = getSpecificTodoListItem(driver, elementPath);
+			currentEle = currentEle.findElement(By.className("todo-checkbox"));
+			if(currentEle.isSelected()) {
+				System.out.println("selected");
+			}//if
+			else {}//else
 			if(confirmCheckmarkClicked(currentEle) > 0) {
 				errorCtr++;
 				System.out.println("ERROR- Checkmark is not clicked.");
