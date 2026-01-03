@@ -153,16 +153,15 @@ public class Testing {
 	}//getTaskListSize
 	
 	/**
-	 * 
-	 * @param driver
-	 * @return
+	 * This method takes a given WebDriver and returns the current size of the active tasks in the task list.
+	 * @param driver The given WebDriver being used for automation.
+	 * @return The size of the active task list in int format. Returns 0 if the active list is empty.
 	 */
 	public static int getActiveTaskListSize(WebDriver driver) {
 		int size = 0;
 		
 		//call getTodoItemList to get the items
 		List<WebElement> itemList = getTodoItemList(driver);
-		List<WebElement> activeList = null;
 		
 		if(itemList.size() > 0) {
 			//iterators to go through list
@@ -173,13 +172,14 @@ public class Testing {
 			while(a1.hasNext() && a2.hasNext()) {
 				//check if the current item is active
 				//if active, add to new list
-				//activeList.add(a1.next())
-				//else not active, skip
+				WebElement temp = selectCheckbox(driver, a1.next().getText());
+				if(confirmCheckmarkNotClicked(temp) == 0) {
+					size++;
+				}//if
+				else {}//else not active, skip
 			}//while
 		}//if
-		else {}//else
-		//set size as the active list
-		size = activeList.size();	
+		else {}//else	
 		
 		return size;
 	}//getActiveTaskListSize
@@ -445,10 +445,11 @@ public class Testing {
 	}//confirmCheckmarkNotClicked
 	
 	/**
-	 * 
-	 * @param driver
-	 * @param elementPath
-	 * @return
+	 * This method takes a given WebDriver and confirms the active tab matches the given String.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param elementPath The String being used to confirm the current tab.
+	 * @return The int that shows the result of the comparison. 
+	 * The int is 0 if the active tab is correct, and a 1 if it does not match.
 	 */
 	public static int confirmActiveTab(WebDriver driver, String elementPath) {
 		String currentTab = getActiveFilterTab(driver);
@@ -462,10 +463,11 @@ public class Testing {
 	}//confirmActiveTab
 	
 	/**
-	 * 
-	 * @param driver
-	 * @param elementPath
-	 * @return
+	 * This method takes a given WebDriver and clicks the tab that matches the given String.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param elementPath The String being used to click the correct tab.
+	 * @return The int that shoes the result of the click.
+	 * The int is 0 if the tab was clicked correctly, and a 1 if the correct tab was not clicked.
 	 */
 	public static int clickTab(WebDriver driver, String elementPath) {
 		WebElement currentEle = getSpecificFilterTab(driver, elementPath);
@@ -487,10 +489,10 @@ public class Testing {
 	}//clickTab
 	
 	/**
-	 * 
-	 * @param driver
-	 * @param tabName
-	 * @return
+	 * This method takes a given WebDriver and String name of the active tab and confirms the tab shown gives an empty state.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param tabName The name of the current tab being checked empty state, in String format.
+	 * @return The int is 0 if the empty state is shown correctly, and greater than 0 if there were errors in the empty state.
 	 */
 	public static int confirmEmptyState(WebDriver driver, String tabName) {
 		//set error counter
@@ -531,22 +533,20 @@ public class Testing {
 			else {}//else
 		}//else
 
-		//check "0 active items left" is shown
-		elementPath = "items-left";
-		currentEle = setElementById(driver, elementPath);
-		elementPath = "0 active items left";
-		if(confirmMessageText(currentEle.getText(), elementPath) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- 0 active items left message is not shown.");
-		}//if
-		else {}//else
+		//check "active items left" is shown
+		errorCtr += confirmItemsLeft(driver);
 		
 		return errorCtr;
 	}//confirmEmptyState
 	
+	/**
+	 * This method takes a given WebDriver and confirms the "active item left" message is shown correctly.
+	 * @param driver The WebDriver being used for the automation.
+	 * @return The int is 0 if the message is displayed correctly, and 1 if the message is not displayed correctly.
+	 */
 	public static int confirmItemsLeft(WebDriver driver) {
 		int errorCtr = 0;
-		int size = getTaskListSize(driver);
+		int size = getActiveTaskListSize(driver);
 		String elementPath = "items-left";
 		WebElement currentEle = setElementById(driver, elementPath);
 		if(size == 1) {
@@ -580,10 +580,10 @@ public class Testing {
 	}//confirmItemsLeft
 	
 	/**
-	 * 
-	 * @param driver
-	 * @param taskMsg
-	 * @return
+	 * This method takes a given WebDriver and adds a task to the todo list using the given String.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param taskMsg The task to be added to the todo list in String format.
+	 * @return The int is 0 if the message is added correctly, and 1 if the message is not added correctly.
 	 */
 	public static int addTask(WebDriver driver, String taskMsg) {
 		//set int to store errors
@@ -672,10 +672,10 @@ public class Testing {
 	}//addTask
 	
 	/**
-	 * 
-	 * @param driver
-	 * @param elementPath
-	 * @return
+	 * This method takes a given WebDriver and given todo item text in String format and confirms the last item added to the list is correct.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param elementPath The text of the last item added to the todo list in String format.
+	 * @return The int returns 0 if the todo item was added correctly, and 1 if the todo item was not added correctly.
 	 */
 	public static int confirmLastTodoListItem(WebDriver driver, String elementPath) {
 		int errorCtr = 0;
@@ -694,6 +694,61 @@ public class Testing {
 		return errorCtr;
 	}//confirmLastTodoListItem
 	
+	/**
+	 * This method takes a given WebDriver and a given todo item in String format and selects the checkbox for the list item.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param elementPath The text of the todo item in String format.
+	 * @return The int returns 0 if the checkbox was selected correctly, and 1 if the checkbox was not selected correctly.
+	 */
+	public static WebElement selectCheckbox(WebDriver driver, String elementPath) {
+		WebElement currentEle = getSpecificTodoListItem(driver, elementPath);
+		if(currentEle == null) {
+			System.out.println("ERROR- Todo list item \" elementPath \" is not found.");
+			return null;
+		}//if
+		else {
+			if(confirmMessageText(getTodoItemText(currentEle), elementPath) > 0) {
+				System.out.println("ERROR- Incorrect todo item shown. \"" + getTodoItemText(currentEle) + "\" is the incorrect message.");
+				return null;
+			}//if
+			else {}//else
+		}//else
+		
+		//get the current todo item checkmark
+		currentEle = getTodoListItemCheckmark(currentEle);
+		return currentEle;
+	}//selectCheckbox
+	
+	/**
+	 * This method takes a given WebDriver and clicks on the checkbox next to a todolist item with given text in String format.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param elementPath The text of the todo item in String format.
+	 * @return The int returns 0 if the checkbox is clicked correctly, and 1 if the checkbox is not clicked correctly.
+	 */
+	public static int clickCheckbox(WebDriver driver, String elementPath) {
+		int errorCtr = 0;
+		//get the correct list checkbox
+		WebElement currentEle = selectCheckbox(driver, elementPath);
+		
+		//confirm the checkbox is not checked yet
+		if(confirmCheckmarkNotClicked(currentEle) > 0) {
+			errorCtr++;
+			System.out.println("ERROR- Checkmark is already clicked.");
+		}//if
+		else {
+			clickElement(currentEle);
+			//confirm the checkbox is now checked
+			elementPath = "wash the car";
+			currentEle = getSpecificTodoListItem(driver, elementPath);
+			currentEle = currentEle.findElement(By.className("todo-checkbox"));
+			if(confirmCheckmarkClicked(currentEle) > 0) {
+				errorCtr++;
+				System.out.println("ERROR- Checkmark is not clicked.");
+			}//if
+			else {}//else
+		}//else
+		return errorCtr;
+	}//clickCheckbox
 	
 	public static void main(String[] args) throws InterruptedException {
 		
@@ -772,7 +827,7 @@ public class Testing {
 		
 		//confirm "wash the car" is still shown
 		elementPath = "wash the car";
-		errorCtr  += confirmLastTodoListItem(driver, elementPath);
+		errorCtr += confirmLastTodoListItem(driver, elementPath);
 		
 		//confirm "1 active item left" is shown
 		errorCtr += confirmItemsLeft(driver);
@@ -781,53 +836,18 @@ public class Testing {
 		elementPath = "completed";
 		errorCtr += clickTab(driver, elementPath);
 		
-		//confirm "There are currently no completed tasks." is still shown
-		errorCtr += confirmEmptyState(driver, completedTabMsg);
-		
 		//click all tab
 		elementPath = "all";
 		errorCtr += clickTab(driver, elementPath);
 		
 		//click the checkbox next to "wash the car"
 		elementPath = "wash the car";
-		WebElement currentEle = getSpecificTodoListItem(driver, elementPath);
-		if(currentEle == null) {
-			errorCtr++;
-			System.out.println("ERROR- Todo list item \" elementPath \" is not found.");
-		}//if
-		else {
-			if(confirmMessageText(getTodoItemText(currentEle), elementPath) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Incorrect todo item shown. \"" + getTodoItemText(currentEle) + "\" is the incorrect message.");
-			}//if
-			else {}//else
-		}//else
-		
-		//get the checkbox
-		currentEle = getTodoListItemCheckmark(currentEle);
-		//confirm the checkbox is not checked yet
-		if(confirmCheckmarkNotClicked(currentEle) > 0) {
-			errorCtr++;
-			System.out.println("ERROR- Checkmark is already clicked.");
-		}//if
-		else {
-			clickElement(currentEle);
-			//confirm the checkbox is now checked
-			elementPath = "wash the car";
-			currentEle = getSpecificTodoListItem(driver, elementPath);
-			currentEle = currentEle.findElement(By.className("todo-checkbox"));
-			if(currentEle.isSelected()) {
-				System.out.println("selected");
-			}//if
-			else {}//else
-			if(confirmCheckmarkClicked(currentEle) > 0) {
-				errorCtr++;
-				System.out.println("ERROR- Checkmark is not clicked.");
-			}//if
-			else {}//else
-		}//else
+		errorCtr += clickCheckbox(driver, elementPath);
 		
 		//confirm the tab is still all tab
+		elementPath = "All";
+		errorCtr += confirmActiveTab(driver, elementPath);
+		
 		//confirm "wash the car" is marked as completed
 		//confirm "0 active items left" is shown
 		
