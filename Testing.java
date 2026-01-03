@@ -172,11 +172,16 @@ public class Testing {
 			while(a1.hasNext() && a2.hasNext()) {
 				//check if the current item is active
 				//if active, add to new list
-				WebElement temp = selectCheckbox(driver, a1.next().getText());
-				if(confirmCheckmarkNotClicked(temp) == 0) {
-					size++;
+				String elementPath = a1.next().getText();
+				WebElement temp = getSpecificTodoListItem(driver, elementPath);
+				if(temp.findElement(By.className("todo-checkbox")) != null) {
+					temp = temp.findElement(By.className("todo-checkbox"));
+					if(confirmCheckmarkNotClicked(temp) == 0) {
+						size++;
+					}//if
+					else {}//else not active, skip
 				}//if
-				else {}//else not active, skip
+				else {}//else
 			}//while
 		}//if
 		else {}//else	
@@ -423,6 +428,7 @@ public class Testing {
 	public static int confirmCheckmarkClicked(WebElement currentEle) {
 		int errorCount = 0;
 		if(!(currentEle.isSelected())){
+			System.out.println("ERROR- Checkbox is not clicked, but should be clicked.");
 			errorCount++;
 		}//if
 		else {}//else
@@ -438,6 +444,7 @@ public class Testing {
 	public static int confirmCheckmarkNotClicked(WebElement currentEle) {
 		int errorCount = 0;
 		if(currentEle.isSelected()){
+			System.out.println("ERROR- Checkbox is clicked, but should not be clicked.");
 			errorCount++;
 		}//if
 		else {}//else
@@ -657,7 +664,7 @@ public class Testing {
 						System.out.println("ERROR- Todo list is empty.");
 					}//if
 					else {
-						elementPath = "wash the car";
+						elementPath = taskMsg;
 						if(confirmMessageText(getTodoItemText(currentEle), elementPath) > 0) {
 							errorCtr++;
 							System.out.println("ERROR- Incorrect todo item shown. \"" + getTodoItemText(currentEle) + "\" is the incorrect message.");
@@ -709,6 +716,8 @@ public class Testing {
 		else {
 			if(confirmMessageText(getTodoItemText(currentEle), elementPath) > 0) {
 				System.out.println("ERROR- Incorrect todo item shown. \"" + getTodoItemText(currentEle) + "\" is the incorrect message.");
+				System.out.println("\"" + elementPath + "\" should be shown instead.");
+			
 				return null;
 			}//if
 			else {}//else
@@ -848,23 +857,64 @@ public class Testing {
 		elementPath = "All";
 		errorCtr += confirmActiveTab(driver, elementPath);
 		
-		//confirm "wash the car" is marked as completed
 		//confirm "0 active items left" is shown
+		errorCtr += confirmItemsLeft(driver);
 		
 		//click active tab
+		elementPath = "active";
+		errorCtr += clickTab(driver, elementPath);
+		
 		//confirm "There are currently no active tasks." is shown
+		errorCtr += confirmEmptyState(driver, activeTabMsg);
 		
 		//click completed tab
+		elementPath = "completed";
+		errorCtr += clickTab(driver, elementPath);
+		
 		//confirm "wash the car" completed task is shown
+		elementPath = "wash the car";
+		errorCtr += confirmLastTodoListItem(driver, elementPath);
 		
-		//click text bar
+		//click all tab
+		elementPath = "all";
+		errorCtr += clickTab(driver, elementPath);
+		
 		//input "change kitchen light" into text bar
-		//press add button
-		//confirm "wash the car" is shown completed
-		//confirm "change kitchen light" is not shown
-		//confirm "1 active item left" is shown
+		elementPath = "change kitchen light";
+		errorCtr += addTask(driver, elementPath);
 		
-		//etc................
+		//confirm all tab is still clicked
+		elementPath = "All";
+		errorCtr += confirmActiveTab(driver, elementPath);
+		
+		//confirm "1 active item left" is shown
+		errorCtr += confirmItemsLeft(driver);
+		
+		//confirm "change kitchen light" is shown
+		elementPath = "change kitchen light";
+		errorCtr += confirmLastTodoListItem(driver, elementPath);
+		
+		//confirm "wash the car" is shown completed
+		elementPath = "wash the car";
+		WebElement currentEle = getSpecificTodoListItem(driver, elementPath);
+		if(currentEle.findElement(By.className("todo-checkbox")) != null) {
+			errorCtr += confirmCheckmarkClicked(currentEle);
+		}//if
+		else {
+			errorCtr++;
+			System.out.println("ERROR- Todo item could not be found to check completion status.");
+		}//else
+		
+		//confirm "change kitchen light" is not completed
+		elementPath = "change kitchen light";
+		currentEle = getSpecificTodoListItem(driver, elementPath);
+		if(currentEle.findElement(By.className("todo-checkbox")) != null) {
+			errorCtr += confirmCheckmarkNotClicked(currentEle);
+		}//if
+		else {
+			errorCtr++;
+			System.out.println("ERROR- Todo item could not be found to check completion status.");
+		}//else
 		
 		//relay error count
 		System.out.print("Testing complete. Found " + errorCtr + " error" + ((errorCtr != 1) ? "s" : "") + " in the test run.");
