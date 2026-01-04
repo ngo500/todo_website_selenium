@@ -915,6 +915,14 @@ public class Testing {
 			errorCtr++;
 			System.out.println("ERROR- Todo item could not be found to check completion status.");
 		}//else
+
+		//delete "wash the car" task
+		elementPath = "wash the car";
+		currentEle = getSpecificTodoListItem(driver, elementPath);
+		currentEle = currentEle.findElement(By.className("button-delete"));
+		clickElement(currentEle);
+		
+		//confirm correct task was clicked and deleted
 		
 		//relay error count
 		System.out.print("Testing complete. Found " + errorCtr + " error" + ((errorCtr != 1) ? "s" : "") + " in the test run.");
