@@ -759,6 +759,70 @@ public class Testing {
 		return errorCtr;
 	}//clickCheckbox
 	
+	/**
+	 * This method takes a given WebDriver and confirms if the given todo task, found with given String, is complete.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param elementPath The text of the todo item being checked in String format.
+	 * @return The int returns 0 if the given task is confirmed to be checked, and 1 if the task is unchecked.
+	 */
+	public static int confirmChecked(WebDriver driver, String elementPath) {
+		int errorCtr = 0;
+		WebElement currentEle = getSpecificTodoListItem(driver, elementPath);
+		if(currentEle.findElement(By.className("todo-checkbox")) != null) {
+			errorCtr += confirmCheckmarkClicked(currentEle);
+		}//if
+		else {
+			errorCtr++;
+			System.out.println("ERROR- Todo item could not be found to check completion status.");
+		}//else
+		return errorCtr;
+	}//confirmChecked
+	
+	/**
+	 * This method takes a given WebDriver and confirms if the given todo task, found with given String, is incomplete.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param elementPath The text of the todo item being checked in String format.
+	 * @return The int returns 0 if the given task is confirmed to be unchecked, and 1 if the task is checked.
+	 */
+	public static int confirmUnchecked(WebDriver driver, String elementPath) {
+		int errorCtr = 0;
+		WebElement currentEle = getSpecificTodoListItem(driver, elementPath);
+		if(currentEle.findElement(By.className("todo-checkbox")) != null) {
+			errorCtr += confirmCheckmarkNotClicked(currentEle);
+		}//if
+		else {
+			errorCtr++;
+			System.out.println("ERROR- Todo item could not be found to check completion status.");
+		}//else
+		return errorCtr;
+	}//confirmUnchecked
+	
+	/**
+	 * This method takes a given WebDriver and given String that is the text for the given todo task, and deletes the given task.
+	 * @param driver The WebDriver being used for the automation.
+	 * @param elementPath The text of the todo item being deleted in String format.
+	 * @return The int returns a 0 if the given item is deleted, and 1 if the item is not deleted.
+	 */
+	public static int deleteItem(WebDriver driver, String elementPath) {
+		int errorCtr = 0;
+		WebElement currentEle = getSpecificTodoListItem(driver, elementPath);
+		if(currentEle != null) {
+			currentEle = currentEle.findElement(By.className("button-delete"));
+			if(currentEle != null) {
+				clickElement(currentEle);
+			}//if
+			else {
+				errorCtr++;
+				System.out.println("ERROR- Could not get delete button for specific todo item.");
+			}//else
+		}//if
+		else {
+			errorCtr++;
+			System.out.println("ERROR- Could not get specific todo item to delete.");
+		}//else
+		return errorCtr;
+	}//deleteItem
+	
 	public static void main(String[] args) throws InterruptedException {
 		
 		//set up a new driver to open up firefox using startSession()
@@ -896,31 +960,15 @@ public class Testing {
 		
 		//confirm "wash the car" is shown completed
 		elementPath = "wash the car";
-		WebElement currentEle = getSpecificTodoListItem(driver, elementPath);
-		if(currentEle.findElement(By.className("todo-checkbox")) != null) {
-			errorCtr += confirmCheckmarkClicked(currentEle);
-		}//if
-		else {
-			errorCtr++;
-			System.out.println("ERROR- Todo item could not be found to check completion status.");
-		}//else
+		errorCtr += confirmChecked(driver, elementPath);
 		
 		//confirm "change kitchen light" is not completed
 		elementPath = "change kitchen light";
-		currentEle = getSpecificTodoListItem(driver, elementPath);
-		if(currentEle.findElement(By.className("todo-checkbox")) != null) {
-			errorCtr += confirmCheckmarkNotClicked(currentEle);
-		}//if
-		else {
-			errorCtr++;
-			System.out.println("ERROR- Todo item could not be found to check completion status.");
-		}//else
-
+		errorCtr += confirmUnchecked(driver, elementPath);
+		
 		//delete "wash the car" task
 		elementPath = "wash the car";
-		currentEle = getSpecificTodoListItem(driver, elementPath);
-		currentEle = currentEle.findElement(By.className("button-delete"));
-		clickElement(currentEle);
+		errorCtr += deleteItem(driver, elementPath);
 		
 		//confirm correct task was clicked and deleted
 		
